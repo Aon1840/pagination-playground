@@ -12,12 +12,15 @@ class AddUserViewModel
 ) : ViewModel() {
 
     var message = MutableLiveData<String>()
+    var isSuccess = MutableLiveData<Boolean>()
 
     fun addUser(userEntity: UserEntity) {
         addUserViewModel.execute({
             message.value = "Add Success"
+            isSuccess.value = true
         }, {
             message.value = it.message
+            isSuccess.value = false
         }, params = AddUserUseCase.Param(userEntity))
     }
 }

@@ -1,14 +1,16 @@
 package com.bearman.pagination_playground.view.activity
 
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.widget.Button
 import android.widget.EditText
 import android.widget.Toast
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.ViewModelProviders
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import com.bearman.pagination_playground.R
 import com.bearman.pagination_playground.data.room.entity.UserEntity
+import com.bearman.pagination_playground.view.adapter.UserListAdapter
 import com.bearman.pagination_playground.view.viewModel.AddUserViewModel
 import com.bearman.pagination_playground.view.viewModel.GetAllUserViewModel
 import dagger.android.support.DaggerAppCompatActivity
@@ -21,7 +23,9 @@ class MainActivity : DaggerAppCompatActivity() {
 
     private lateinit var addUserViewModel: AddUserViewModel
     private lateinit var getAllUserViewModel: GetAllUserViewModel
+    private var userListAdapter = UserListAdapter(arrayListOf())
 
+    lateinit var rvUser: RecyclerView
     lateinit var etName: EditText
     lateinit var etPhone: EditText
     lateinit var btAdd: Button
@@ -40,14 +44,20 @@ class MainActivity : DaggerAppCompatActivity() {
     }
 
     private fun initView() {
+        rvUser = findViewById(R.id.rvUser)
         etName = findViewById(R.id.etName)
         etPhone = findViewById(R.id.etPhone)
         btAdd = findViewById(R.id.btAdd)
+
+        rvUser.apply {
+            layoutManager = LinearLayoutManager(context, LinearLayoutManager.VERTICAL, false)
+            adapter = userListAdapter
+        }
     }
 
     private fun observer() {
         getAllUserViewModel.userList.observe(this, {
-            Toast.makeText(this, it.toString(), Toast.LENGTH_LONG).show()
+            userListAdapter.updateUsers(it)
         })
 
         getAllUserViewModel.error.observe(this, {
@@ -56,6 +66,12 @@ class MainActivity : DaggerAppCompatActivity() {
 
         addUserViewModel.message.observe(this, {
             Toast.makeText(this, it, Toast.LENGTH_LONG).show()
+        })
+
+        addUserViewModel.isSuccess.observe(this, {
+            if (it) {
+                getAllUserViewModel.getAllUser()
+            }
         })
     }
 
